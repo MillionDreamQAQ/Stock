@@ -146,7 +146,7 @@ function StockPage() {
           />
         </div>
       </Header>
-      <Content style={{ padding: "20px", background: "#f0f2f5" }}>
+      <Content style={{ padding: "12px", background: "#f0f2f5" }}>
         <div
           style={{
             background: "#fff",
