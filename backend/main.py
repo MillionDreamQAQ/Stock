@@ -124,43 +124,58 @@ def sync_stock_list():
 @app.post("/api/sync/stock/{code}")
 def sync_stock_data(code: str):
     """
-    同步指定股票的历史数据
+    同步指定股票或指数的历史数据
     """
     try:
-        print(f"开始同步股票 {code} 数据...")
+        print(f"开始同步 {code} 数据...")
 
-        # 获取股票数据
-        df = ak.stock_zh_a_hist(symbol=code, adjust="qfq")  # 前复权数据
+        # 规范化股票代码
+        db_code, pure_code, is_index = normalize_stock_code(code)
+
+        # 根据类型选择不同的akshare接口
+        if is_index:
+            # 指数使用专门的接口
+            print(f"使用指数接口获取数据: {db_code}")
+            df = ak.stock_zh_index_daily(symbol=db_code)
+        else:
+            # 股票使用前复权接口
+            print(f"使用股票接口获取数据: {pure_code}")
+            df = ak.stock_zh_a_hist(symbol=pure_code, adjust="qfq")
 
         if df is None or df.empty:
-            raise HTTPException(status_code=404, detail=f"No data for stock {code}")
+            raise HTTPException(status_code=404, detail=f"No data for {code}")
 
-        # 确保date列是datetime类型
-        df['date'] = pd.to_datetime(df['日期'])
-        df = df.rename(columns={
-            '开盘': 'open',
-            '最高': 'high',
-            '最低': 'low',
-            '收盘': 'close',
-            '成交量': 'volume'
-        })
+        # 确保date列是datetime类型并统一列名
+        if is_index:
+            # 指数接口返回：date, open, close, high, low, volume
+            df['date'] = pd.to_datetime(df['date'])
+        else:
+            # 股票接口返回：日期, 开盘, 收盘, 最高, 最低, 成交量
+            df['date'] = pd.to_datetime(df['日期'])
+            df = df.rename(columns={
+                '开盘': 'open',
+                '最高': 'high',
+                '最低': 'low',
+                '收盘': 'close',
+                '成交量': 'volume'
+            })
 
         print(f"从akshare获取到 {len(df)} 条数据")
 
         # 批量插入数据库
-        inserted = db.insert_batch(code, df[['date', 'open', 'high', 'low', 'close', 'volume']])
+        inserted = db.insert_batch(db_code, df[['date', 'open', 'high', 'low', 'close', 'volume']])
 
         # 更新同步记录
-        db.update_sync_record(code, len(df))
+        db.update_sync_record(db_code, len(df))
 
         # 获取数据库中的数据范围
-        data_range = db.get_data_range(code)
+        data_range = db.get_data_range(db_code)
 
         print(f"同步完成，新插入 {inserted} 条数据")
 
         return {
             "success": True,
-            "code": code,
+            "code": db_code,
             "total_from_akshare": len(df),
             "inserted": inserted,
             "database_info": data_range
