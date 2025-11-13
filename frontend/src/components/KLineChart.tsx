@@ -77,6 +77,9 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
     changePercent: "--",
   });
 
+  // 缠论K线模式切换
+  const [isChanMode, setIsChanMode] = useState<boolean>(false);
+
   useEffect(() => {
     if (
       !mainChartContainerRef.current ||
@@ -345,13 +348,28 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
     const currentRange = timeScale.getVisibleLogicalRange();
 
     // 转换K线数据格式
-    const chartData: CandlestickData[] = data.map((item) => ({
-      time: item.date as any,
-      open: item.open,
-      high: item.high,
-      low: item.low,
-      close: item.close,
-    }));
+    const chartData: CandlestickData[] = data.map((item) => {
+      if (isChanMode) {
+        // 缠论模式：开盘=低点，收盘=高点，这样就没有上下影线
+        // 整个K线就是一个从低到高的箱体
+        return {
+          time: item.date as any,
+          open: item.low,
+          high: item.high,
+          low: item.low,
+          close: item.high,
+        };
+      } else {
+        // 正常模式：显示完整K线
+        return {
+          time: item.date as any,
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+        };
+      }
+    });
 
     candlestickSeriesRef.current.setData(chartData);
 
@@ -768,7 +786,7 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
       volumeChart.unsubscribeCrosshairMove(handleVolumeCrosshairMove);
       macdChart.unsubscribeCrosshairMove(handleMacdCrosshairMove);
     };
-  }, [data]);
+  }, [data, isChanMode]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -797,6 +815,40 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
             {title}
           </div>
         )}
+
+        {/* 缠论K线模式切换按钮 - 右上角 */}
+        <button
+          onClick={() => setIsChanMode(!isChanMode)}
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "12px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            color: isChanMode ? "#fff" : "#333",
+            backgroundColor: isChanMode ? "#2962FF" : "rgba(255, 255, 255, 0.9)",
+            border: isChanMode ? "none" : "1px solid #ccc",
+            borderRadius: "4px",
+            cursor: "pointer",
+            zIndex: 10,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            if (!isChanMode) {
+              e.currentTarget.style.backgroundColor = "rgba(41, 98, 255, 0.1)";
+              e.currentTarget.style.borderColor = "#2962FF";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isChanMode) {
+              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+              e.currentTarget.style.borderColor = "#ccc";
+            }
+          }}
+        >
+          {isChanMode ? "标准K线" : "缠论K线"}
+        </button>
 
         {/* K线数据显示 - 覆盖在图表左上角，纵向排列 */}
         <div
