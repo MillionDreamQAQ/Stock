@@ -351,7 +351,16 @@ export const useChartData = ({
     if (currentRange) {
       timeScale.setVisibleLogicalRange(currentRange);
     } else {
-      timeScale.fitContent();
+      // 默认显示最近约一个月的数据(约100个交易日)
+      const dataLength = chartData.length;
+      const barsToShow = Math.min(100, dataLength);
+      const from = Math.max(0, dataLength - barsToShow);
+      const to = dataLength - 1;
+
+      timeScale.setVisibleLogicalRange({
+        from: from,
+        to: to,
+      });
     }
 
     return () => {
