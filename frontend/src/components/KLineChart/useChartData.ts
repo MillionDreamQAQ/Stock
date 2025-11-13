@@ -180,34 +180,10 @@ export const useChartData = ({
     signalLineRef.current.setData(deaLineData);
     histogramSeriesRef.current.setData(macdHistogramData);
 
-    // 设置十字线移动监听
-    const handleMainCrosshairMove = (param: any) => {
-      if (param.time) {
-        const volumeData = volumeSeriesRef.current.dataByIndex(param.logical);
-        const macdHistogramData = histogramSeriesRef.current.dataByIndex(
-          param.logical
-        );
-
-        if (volumeData) {
-          volumeChart.setCrosshairPosition(
-            volumeData.value,
-            param.time,
-            volumeSeriesRef.current
-          );
-        }
-        if (macdHistogramData) {
-          macdChart.setCrosshairPosition(
-            macdHistogramData.value,
-            param.time,
-            histogramSeriesRef.current
-          );
-        }
-      } else {
-        volumeChart.clearCrosshairPosition();
-        macdChart.clearCrosshairPosition();
-      }
-
+    // 共用的数据更新逻辑
+    const updateDisplayData = (param: any) => {
       if (!param.time || !param.point) {
+        // 鼠标移出图表，显示最后一根K线的数据
         const lastIndex = macdData.length - 1;
         if (lastIndex >= 0) {
           setMacdDisplay({
@@ -239,6 +215,7 @@ export const useChartData = ({
           });
         }
       } else {
+        // 鼠标在图表上，显示当前位置的数据
         const klineData = candlestickSeriesRef.current.dataByIndex(
           param.logical
         );
@@ -266,15 +243,17 @@ export const useChartData = ({
           });
         }
 
-        const macdData = histogramSeriesRef.current.dataByIndex(param.logical);
-        if (macdData) {
+        const macdDataPoint = histogramSeriesRef.current.dataByIndex(
+          param.logical
+        );
+        if (macdDataPoint) {
           const difData = macdLineRef.current.dataByIndex(param.logical);
           const deaData = signalLineRef.current.dataByIndex(param.logical);
 
           setMacdDisplay({
             dif: difData?.value?.toFixed(4) || "--",
             dea: deaData?.value?.toFixed(4) || "--",
-            macd: macdData.value.toFixed(4),
+            macd: macdDataPoint.value.toFixed(4),
           });
         }
 
@@ -287,7 +266,40 @@ export const useChartData = ({
       }
     };
 
+    // 设置十字线移动监听
+    const handleMainCrosshairMove = (param: any) => {
+      // 同步其他图表的十字线
+      if (param.time) {
+        const volumeData = volumeSeriesRef.current.dataByIndex(param.logical);
+        const macdHistogramData = histogramSeriesRef.current.dataByIndex(
+          param.logical
+        );
+
+        if (volumeData) {
+          volumeChart.setCrosshairPosition(
+            volumeData.value,
+            param.time,
+            volumeSeriesRef.current
+          );
+        }
+        if (macdHistogramData) {
+          macdChart.setCrosshairPosition(
+            macdHistogramData.value,
+            param.time,
+            histogramSeriesRef.current
+          );
+        }
+      } else {
+        volumeChart.clearCrosshairPosition();
+        macdChart.clearCrosshairPosition();
+      }
+
+      // 更新显示数据
+      updateDisplayData(param);
+    };
+
     const handleVolumeCrosshairMove = (param: any) => {
+      // 同步其他图表的十字线
       if (param.time) {
         const klineData = candlestickSeriesRef.current.dataByIndex(
           param.logical
@@ -314,9 +326,13 @@ export const useChartData = ({
         mainChart.clearCrosshairPosition();
         macdChart.clearCrosshairPosition();
       }
+
+      // 更新显示数据
+      updateDisplayData(param);
     };
 
     const handleMacdCrosshairMove = (param: any) => {
+      // 同步其他图表的十字线
       if (param.time) {
         const klineData = candlestickSeriesRef.current.dataByIndex(
           param.logical
@@ -341,6 +357,9 @@ export const useChartData = ({
         mainChart.clearCrosshairPosition();
         volumeChart.clearCrosshairPosition();
       }
+
+      // 更新显示数据
+      updateDisplayData(param);
     };
 
     mainChart.subscribeCrosshairMove(handleMainCrosshairMove);
