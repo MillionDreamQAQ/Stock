@@ -4,9 +4,9 @@
 
 export interface MACDResult {
   time: string;
-  dif: number;    // DIF线（差离值）= 快线EMA - 慢线EMA
-  dea: number;    // DEA线（信号线）= DIF的EMA
-  macd: number;   // MACD柱状图 = DIF - DEA
+  dif: number; // DIF线（差离值）= 快线EMA - 慢线EMA
+  dea: number; // DEA线（信号线）= DIF的EMA
+  macd: number; // MACD柱状图 = DIF - DEA
 }
 
 /**
@@ -91,8 +91,13 @@ export function calculateMACDFromKLineData(
   slowPeriod: number = 26,
   signalPeriod: number = 9
 ): MACDResult[] {
-  const prices = data.map(d => d.close);
-  const { dif, dea, macd } = calculateMACD(prices, fastPeriod, slowPeriod, signalPeriod);
+  const prices = data.map((d) => d.close);
+  const { dif, dea, macd } = calculateMACD(
+    prices,
+    fastPeriod,
+    slowPeriod,
+    signalPeriod
+  );
 
   const results: MACDResult[] = [];
 
@@ -100,9 +105,9 @@ export function calculateMACDFromKLineData(
   for (let i = 0; i < data.length; i++) {
     results.push({
       time: data[i].date,
-      dif: dif[i],       // DIF线
-      dea: dea[i],       // DEA线
-      macd: macd[i],     // MACD柱状图
+      dif: dif[i], // DIF线
+      dea: dea[i], // DEA线
+      macd: macd[i], // MACD柱状图
     });
   }
 

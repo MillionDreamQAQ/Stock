@@ -99,7 +99,9 @@ export const ChartOverlay: React.FC<ChartOverlayProps> = ({
         }}
       >
         <div>
-          <span style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}>
+          <span
+            style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+          >
             开盘价:
           </span>
           <span style={{ fontWeight: "600", color: "#ff00f2ff" }}>
@@ -107,7 +109,9 @@ export const ChartOverlay: React.FC<ChartOverlayProps> = ({
           </span>
         </div>
         <div>
-          <span style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}>
+          <span
+            style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+          >
             最高价:
           </span>
           <span style={{ fontWeight: "600", color: "#ef5350" }}>
@@ -115,7 +119,9 @@ export const ChartOverlay: React.FC<ChartOverlayProps> = ({
           </span>
         </div>
         <div>
-          <span style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}>
+          <span
+            style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+          >
             最低价:
           </span>
           <span style={{ fontWeight: "600", color: "#26a69a" }}>
@@ -123,7 +129,9 @@ export const ChartOverlay: React.FC<ChartOverlayProps> = ({
           </span>
         </div>
         <div>
-          <span style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}>
+          <span
+            style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+          >
             收盘价:
           </span>
           <span style={{ fontWeight: "600", color: "#2962FF" }}>
@@ -131,20 +139,26 @@ export const ChartOverlay: React.FC<ChartOverlayProps> = ({
           </span>
         </div>
         <div>
-          <span style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}>
+          <span
+            style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+          >
             涨跌额:
           </span>
           <span
             style={{
               fontWeight: "600",
-              color: klineDisplay.change.startsWith("-") ? "#26a69a" : "#ef5350",
+              color: klineDisplay.change.startsWith("-")
+                ? "#26a69a"
+                : "#ef5350",
             }}
           >
             {klineDisplay.change}
           </span>
         </div>
         <div>
-          <span style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}>
+          <span
+            style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+          >
             涨跌幅:
           </span>
           <span

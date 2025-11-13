@@ -56,13 +56,17 @@ export const MACDDisplay: React.FC<MACDDisplayProps> = ({ dif, dea, macd }) => {
       }}
     >
       <div>
-        <span style={{ fontWeight: "600", color: "#2196F3", marginRight: "6px" }}>
+        <span
+          style={{ fontWeight: "600", color: "#2196F3", marginRight: "6px" }}
+        >
           DIF:
         </span>
         <span style={{ fontWeight: "600", color: "#2196F3" }}>{dif}</span>
       </div>
       <div>
-        <span style={{ fontWeight: "600", color: "#FF6D00", marginRight: "6px" }}>
+        <span
+          style={{ fontWeight: "600", color: "#FF6D00", marginRight: "6px" }}
+        >
           DEA:
         </span>
         <span style={{ fontWeight: "600", color: "#FF6D00" }}>{dea}</span>

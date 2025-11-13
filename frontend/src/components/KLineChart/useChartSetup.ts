@@ -57,7 +57,9 @@ export const useChartSetup = ({ onLoadMore }: UseChartSetupProps) => {
     mainChartRef.current = mainChart;
 
     // 创建K线系列
-    const candlestickSeries = mainChart.addCandlestickSeries(candlestickSeriesConfig);
+    const candlestickSeries = mainChart.addCandlestickSeries(
+      candlestickSeriesConfig
+    );
     candlestickSeriesRef.current = candlestickSeries;
 
     // 创建笔的线段系列（在主图上）
@@ -148,7 +150,9 @@ export const useChartSetup = ({ onLoadMore }: UseChartSetupProps) => {
       }
     };
 
-    mainTimeScale.subscribeVisibleLogicalRangeChange(handleVisibleLogicalRangeChange);
+    mainTimeScale.subscribeVisibleLogicalRangeChange(
+      handleVisibleLogicalRangeChange
+    );
 
     // 响应式处理
     const handleResize = () => {
@@ -172,7 +176,9 @@ export const useChartSetup = ({ onLoadMore }: UseChartSetupProps) => {
     window.addEventListener("resize", handleResize);
 
     return () => {
-      mainTimeScale.unsubscribeVisibleLogicalRangeChange(handleVisibleLogicalRangeChange);
+      mainTimeScale.unsubscribeVisibleLogicalRangeChange(
+        handleVisibleLogicalRangeChange
+      );
       mainTimeScale.unsubscribeVisibleLogicalRangeChange(syncFromMain);
       volumeTimeScale.unsubscribeVisibleLogicalRangeChange(syncFromVolume);
       macdTimeScale.unsubscribeVisibleLogicalRangeChange(syncFromMacd);

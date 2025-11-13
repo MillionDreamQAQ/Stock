@@ -3,7 +3,7 @@
  */
 
 import type { KLineData } from "../../types/stock";
-import type { CandlestickData, HistogramData, LineData, Time } from "lightweight-charts";
+import type { CandlestickData, HistogramData } from "lightweight-charts";
 
 /**
  * 格式化成交量显示
@@ -35,7 +35,9 @@ export const formatPercent = (percent: number): string => {
 /**
  * 转换K线数据为图表数据（标准模式）
  */
-export const convertToStandardChartData = (data: KLineData[]): CandlestickData[] => {
+export const convertToStandardChartData = (
+  data: KLineData[]
+): CandlestickData[] => {
   return data.map((item) => ({
     time: item.date as any,
     open: item.open,
@@ -48,7 +50,9 @@ export const convertToStandardChartData = (data: KLineData[]): CandlestickData[]
 /**
  * 转换K线数据为图表数据（缠论模式）
  */
-export const convertToChanChartData = (data: KLineData[]): CandlestickData[] => {
+export const convertToChanChartData = (
+  data: KLineData[]
+): CandlestickData[] => {
   return data.map((item) => ({
     time: item.date as any,
     open: item.low,

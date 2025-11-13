@@ -72,7 +72,11 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
       {/* MACD副图容器 */}
       <div style={{ position: "relative", marginBottom: "10px" }}>
         <div ref={macdChartContainerRef} />
-        <MACDDisplay dif={macdDisplay.dif} dea={macdDisplay.dea} macd={macdDisplay.macd} />
+        <MACDDisplay
+          dif={macdDisplay.dif}
+          dea={macdDisplay.dea}
+          macd={macdDisplay.macd}
+        />
       </div>
     </div>
   );

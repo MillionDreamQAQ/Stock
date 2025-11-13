@@ -4,7 +4,13 @@
 
 import { useEffect, useState } from "react";
 import type { KLineData } from "../../types/stock";
-import type { IChartApi, SeriesMarker, Time, LineData, HistogramData } from "lightweight-charts";
+import type {
+  IChartApi,
+  SeriesMarker,
+  Time,
+  LineData,
+  HistogramData,
+} from "lightweight-charts";
 import { calculateMACDFromKLineData } from "../../utils/indicators";
 import { analyzeChanLun } from "../../utils/chanlun";
 import {
@@ -178,7 +184,9 @@ export const useChartData = ({
     const handleMainCrosshairMove = (param: any) => {
       if (param.time) {
         const volumeData = volumeSeriesRef.current.dataByIndex(param.logical);
-        const macdHistogramData = histogramSeriesRef.current.dataByIndex(param.logical);
+        const macdHistogramData = histogramSeriesRef.current.dataByIndex(
+          param.logical
+        );
 
         if (volumeData) {
           volumeChart.setCrosshairPosition(
@@ -226,11 +234,14 @@ export const useChartData = ({
             low: formatPrice(lastData.low),
             close: formatPrice(lastData.close),
             change: (change >= 0 ? "+" : "") + formatPrice(change),
-            changePercent: (change >= 0 ? "+" : "") + formatPercent(changePercent),
+            changePercent:
+              (change >= 0 ? "+" : "") + formatPercent(changePercent),
           });
         }
       } else {
-        const klineData = candlestickSeriesRef.current.dataByIndex(param.logical);
+        const klineData = candlestickSeriesRef.current.dataByIndex(
+          param.logical
+        );
         if (klineData) {
           let open, close;
           if (isChanMode) {
@@ -250,7 +261,8 @@ export const useChartData = ({
             low: formatPrice(klineData.low),
             close: formatPrice(close),
             change: (change >= 0 ? "+" : "") + formatPrice(change),
-            changePercent: (change >= 0 ? "+" : "") + formatPercent(changePercent),
+            changePercent:
+              (change >= 0 ? "+" : "") + formatPercent(changePercent),
           });
         }
 
@@ -266,7 +278,9 @@ export const useChartData = ({
           });
         }
 
-        const volumeDataPoint = volumeSeriesRef.current.dataByIndex(param.logical);
+        const volumeDataPoint = volumeSeriesRef.current.dataByIndex(
+          param.logical
+        );
         if (volumeDataPoint) {
           setVolumeDisplay(formatVolume(volumeDataPoint.value));
         }
@@ -275,8 +289,12 @@ export const useChartData = ({
 
     const handleVolumeCrosshairMove = (param: any) => {
       if (param.time) {
-        const klineData = candlestickSeriesRef.current.dataByIndex(param.logical);
-        const macdHistogramData = histogramSeriesRef.current.dataByIndex(param.logical);
+        const klineData = candlestickSeriesRef.current.dataByIndex(
+          param.logical
+        );
+        const macdHistogramData = histogramSeriesRef.current.dataByIndex(
+          param.logical
+        );
 
         if (klineData) {
           mainChart.setCrosshairPosition(
@@ -300,7 +318,9 @@ export const useChartData = ({
 
     const handleMacdCrosshairMove = (param: any) => {
       if (param.time) {
-        const klineData = candlestickSeriesRef.current.dataByIndex(param.logical);
+        const klineData = candlestickSeriesRef.current.dataByIndex(
+          param.logical
+        );
         const volumeData = volumeSeriesRef.current.dataByIndex(param.logical);
 
         if (klineData) {
