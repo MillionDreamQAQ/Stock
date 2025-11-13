@@ -821,8 +821,8 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
           onClick={() => setIsChanMode(!isChanMode)}
           style={{
             position: "absolute",
-            top: "8px",
-            right: "12px",
+            top: "4px",
+            right: "96px",
             padding: "6px 12px",
             fontSize: "14px",
             fontWeight: "600",
