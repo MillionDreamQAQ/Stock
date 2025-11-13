@@ -5,9 +5,12 @@ import {
   type CandlestickData,
   type LineData,
   type HistogramData,
+  type SeriesMarker,
+  type Time,
 } from "lightweight-charts";
 import type { KLineData } from "../types/stock";
 import { calculateMACDFromKLineData } from "../utils/indicators";
+import { analyzeChanLun } from "../utils/chanlun";
 
 interface KLineChartProps {
   data: KLineData[];
@@ -38,6 +41,7 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
   const macdLineRef = useRef<any>(null);
   const signalLineRef = useRef<any>(null);
   const histogramSeriesRef = useRef<any>(null);
+  const penSeriesRef = useRef<any>(null); // 笔的线段系列
   const isFirstLoadRef = useRef(true);
   const previousDataLengthRef = useRef(0);
   const hasTriggeredLoadRef = useRef(false);
@@ -108,6 +112,16 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
     });
 
     candlestickSeriesRef.current = candlestickSeries;
+
+    // 创建笔的线段系列（在主图上）
+    const penSeries = mainChart.addLineSeries({
+      color: "#2962FF",
+      lineWidth: 2,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    });
+    penSeriesRef.current = penSeries;
 
     // 创建成交量副图
     const volumeChart = createChart(volumeChartContainerRef.current, {
@@ -323,6 +337,56 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
     }));
 
     candlestickSeriesRef.current.setData(chartData);
+
+    // 进行缠论分析：识别分型和笔
+    const { fractals, pens } = analyzeChanLun(data);
+
+    // 添加分型标记
+    const markers: SeriesMarker<Time>[] = fractals.map((fractal) => ({
+      time: fractal.timestamp as Time,
+      position: fractal.type === "top" ? "aboveBar" : "belowBar",
+      color: fractal.type === "top" ? "#ef5350" : "#26a69a",
+      shape: fractal.type === "top" ? "arrowDown" : "arrowUp",
+      text: fractal.type === "top" ? "顶" : "底",
+    }));
+    candlestickSeriesRef.current.setMarkers(markers);
+
+    // 绘制笔：将笔的端点连接成线段
+    if (penSeriesRef.current && pens.length > 0) {
+      const penLineData: LineData[] = [];
+      const timeSet = new Set<string>(); // 用于去重
+
+      pens.forEach((pen) => {
+        // 添加笔的起点
+        const startKline = data[pen.startIndex];
+        if (startKline && !timeSet.has(startKline.date)) {
+          penLineData.push({
+            time: startKline.date as Time,
+            value: pen.startPrice,
+          });
+          timeSet.add(startKline.date);
+        }
+
+        // 添加笔的终点
+        const endKline = data[pen.endIndex];
+        if (endKline && !timeSet.has(endKline.date)) {
+          penLineData.push({
+            time: endKline.date as Time,
+            value: pen.endPrice,
+          });
+          timeSet.add(endKline.date);
+        }
+      });
+
+      // 按时间排序（确保升序）
+      penLineData.sort((a, b) => {
+        const timeA = typeof a.time === "string" ? a.time : String(a.time);
+        const timeB = typeof b.time === "string" ? b.time : String(b.time);
+        return timeA.localeCompare(timeB);
+      });
+
+      penSeriesRef.current.setData(penLineData);
+    }
 
     // 转换成交量数据格式
     const volumeData: HistogramData[] = data.map((item, index) => ({
