@@ -13,6 +13,10 @@ export interface ProcessedKLine {
   low: number; // 最低价
   close: number; // 收盘价
   volume: number; // 成交量
+  highIndex?: number; // 最高点对应的原始K线索引
+  highTimestamp?: string; // 最高点对应的时间戳
+  lowIndex?: number; // 最低点对应的原始K线索引
+  lowTimestamp?: string; // 最低点对应的时间戳
 }
 
 /**
@@ -25,11 +29,13 @@ export type FractalType = "top" | "bottom";
  */
 export interface Fractal {
   type: FractalType; // 类型：'top'顶分型或'bottom'底分型
-  index: number; // 中间K线在原始数据中的索引
+  index: number; // 中间K线在原始数据中的索引（极值对应的索引）
   price: number; // 分型价格（顶分型取高点，底分型取低点）
   leftIndex: number; // 左侧K线索引
   rightIndex: number; // 右侧K线索引
-  timestamp: string; // 时间戳
+  timestamp: string; // 时间戳（极值对应的时间戳，用于图表标记显示）
+  processedIndex?: number; // 处理后K线的索引（用于逻辑判断，保持时间顺序）
+  processedTimestamp?: string; // 处理后K线的时间戳（用于保持时间顺序）
 }
 
 /**

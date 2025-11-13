@@ -36,6 +36,10 @@ export function processKLineContainment(klines: KLineData[]): ProcessedKLine[] {
     low: klines[0].low,
     close: klines[0].close,
     volume: klines[0].volume,
+    highIndex: 0,
+    highTimestamp: klines[0].date,
+    lowIndex: 0,
+    lowTimestamp: klines[0].date,
   });
 
   for (let i = 1; i < klines.length; i++) {
@@ -61,15 +65,46 @@ export function processKLineContainment(klines: KLineData[]): ProcessedKLine[] {
       // 根据走势方向合并K线
       if (isUpTrend) {
         // 向上走势：取高点中的较高值和低点中的较高值
-        previous.high = Math.max(previous.high, current.high);
-        previous.low = Math.max(previous.low, current.low);
+        const newHigh = Math.max(previous.high, current.high);
+        const newLow = Math.max(previous.low, current.low);
+
+        // 如果当前K线的高点更高，则更新高点位置
+        if (current.high > previous.high) {
+          previous.highIndex = i;
+          previous.highTimestamp = current.date;
+        }
+        // 如果当前K线的低点更高，则更新低点位置
+        if (current.low > previous.low) {
+          previous.lowIndex = i;
+          previous.lowTimestamp = current.date;
+        }
+
+        previous.high = newHigh;
+        previous.low = newLow;
       } else {
         // 向下走势：取高点中的较低值和低点中的较低值
-        previous.high = Math.min(previous.high, current.high);
-        previous.low = Math.min(previous.low, current.low);
+        const newHigh = Math.min(previous.high, current.high);
+        const newLow = Math.min(previous.low, current.low);
+
+        // 如果当前K线的高点更低，则更新高点位置
+        if (current.high < previous.high) {
+          previous.highIndex = i;
+          previous.highTimestamp = current.date;
+        }
+        // 如果当前K线的低点更低，则更新低点位置
+        if (current.low < previous.low) {
+          previous.lowIndex = i;
+          previous.lowTimestamp = current.date;
+        }
+
+        previous.high = newHigh;
+        previous.low = newLow;
       }
 
-      // 更新收盘价和成交量
+      // 更新时间戳、收盘价和成交量
+      // 时间戳更新为最新的K线时间
+      previous.timestamp = current.date;
+      previous.index = i; // 同时更新索引为当前K线的索引
       previous.close = current.close;
       previous.volume += current.volume;
     } else {
@@ -82,6 +117,10 @@ export function processKLineContainment(klines: KLineData[]): ProcessedKLine[] {
         low: current.low,
         close: current.close,
         volume: current.volume,
+        highIndex: i,
+        highTimestamp: current.date,
+        lowIndex: i,
+        lowTimestamp: current.date,
       });
     }
   }
@@ -125,11 +164,13 @@ export function identifyTopFractals(klines: ProcessedKLine[]): Fractal[] {
     if (isTopFractal) {
       fractals.push({
         type: "top",
-        index: middle.index,
+        index: middle.highIndex ?? middle.index, // 使用高点对应的索引（用于标记显示）
         price: middle.high,
         leftIndex: left.index,
         rightIndex: right.index,
-        timestamp: middle.timestamp,
+        timestamp: middle.highTimestamp ?? middle.timestamp, // 使用高点对应的时间戳（用于标记显示）
+        processedIndex: middle.index, // 保存处理后K线的索引（用于逻辑判断）
+        processedTimestamp: middle.timestamp, // 保存处理后K线的时间戳（保持时间顺序）
       });
     }
   }
@@ -173,11 +214,13 @@ export function identifyBottomFractals(klines: ProcessedKLine[]): Fractal[] {
     if (isBottomFractal) {
       fractals.push({
         type: "bottom",
-        index: middle.index,
+        index: middle.lowIndex ?? middle.index, // 使用低点对应的索引（用于标记显示）
         price: middle.low,
         leftIndex: left.index,
         rightIndex: right.index,
-        timestamp: middle.timestamp,
+        timestamp: middle.lowTimestamp ?? middle.timestamp, // 使用低点对应的时间戳（用于标记显示）
+        processedIndex: middle.index, // 保存处理后K线的索引（用于逻辑判断）
+        processedTimestamp: middle.timestamp, // 保存处理后K线的时间戳（保持时间顺序）
       });
     }
   }
@@ -206,24 +249,15 @@ export function identifyFractals(klines: KLineData[]): Fractal[] {
   const topFractals = identifyTopFractals(processedKLines);
   const bottomFractals = identifyBottomFractals(processedKLines);
 
-  // 3. 合并并按处理后K线的索引排序（注意这里用处理后数组的索引，不是原始索引）
-  const allCandidates: Array<Fractal & { processedIndex: number }> = [
-    ...topFractals.map((f, idx) => {
-      // 找到该分型在processedKLines中的位置
-      const processedIndex = processedKLines.findIndex(
-        (k) => k.index === f.index
-      );
-      return { ...f, processedIndex };
-    }),
-    ...bottomFractals.map((f, idx) => {
-      const processedIndex = processedKLines.findIndex(
-        (k) => k.index === f.index
-      );
-      return { ...f, processedIndex };
-    }),
-  ];
+  // 3. 合并并按处理后K线的索引排序（使用 processedIndex 而不是 index）
+  const allCandidates: Fractal[] = [...topFractals, ...bottomFractals];
 
-  allCandidates.sort((a, b) => a.processedIndex - b.processedIndex);
+  // 按处理后的索引排序，以保持正确的时间顺序
+  allCandidates.sort((a, b) => {
+    const aIdx = a.processedIndex ?? a.index;
+    const bIdx = b.processedIndex ?? b.index;
+    return aIdx - bIdx;
+  });
 
   // 4. 筛选有效的分型：确保相邻分型类型不同，且间隔至少3根处理后的K线
   const validFractals: Fractal[] = [];
@@ -231,25 +265,23 @@ export function identifyFractals(klines: KLineData[]): Fractal[] {
   for (const candidate of allCandidates) {
     if (validFractals.length === 0) {
       // 第一个分型直接添加
-      const { processedIndex, ...fractal } = candidate;
-      validFractals.push(fractal);
+      validFractals.push(candidate);
       continue;
     }
 
     const lastFractal = validFractals[validFractals.length - 1];
-    const lastProcessedIndex = processedKLines.findIndex(
-      (k) => k.index === lastFractal.index
-    );
+    const lastProcessedIndex = lastFractal.processedIndex ?? lastFractal.index;
+    const candidateProcessedIndex =
+      candidate.processedIndex ?? candidate.index;
 
     // 检查两个条件：
     // 1. 类型必须不同（顶底交替）
     // 2. 在处理后的K线数组中，至少间隔3根K线（即索引差>=4）
     const isDifferentType = candidate.type !== lastFractal.type;
-    const hasEnoughGap = candidate.processedIndex - lastProcessedIndex >= 4;
+    const hasEnoughGap = candidateProcessedIndex - lastProcessedIndex >= 4;
 
     if (isDifferentType && hasEnoughGap) {
-      const { processedIndex, ...fractal } = candidate;
-      validFractals.push(fractal);
+      validFractals.push(candidate);
     } else if (isDifferentType && !hasEnoughGap) {
       // 如果类型不同但间隔不够，跳过
       continue;
@@ -257,15 +289,13 @@ export function identifyFractals(klines: KLineData[]): Fractal[] {
       // 如果类型相同，选择更极端的那个（顶分型选更高的，底分型选更低的）
       if (candidate.type === "top" && candidate.price > lastFractal.price) {
         // 替换为更高的顶
-        validFractals[validFractals.length - 1] = { ...candidate };
-        delete (validFractals[validFractals.length - 1] as any).processedIndex;
+        validFractals[validFractals.length - 1] = candidate;
       } else if (
         candidate.type === "bottom" &&
         candidate.price < lastFractal.price
       ) {
         // 替换为更低的底
-        validFractals[validFractals.length - 1] = { ...candidate };
-        delete (validFractals[validFractals.length - 1] as any).processedIndex;
+        validFractals[validFractals.length - 1] = candidate;
       }
     }
   }
