@@ -60,6 +60,23 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
     macd: "--",
   });
 
+  // K线数据显示状态
+  const [klineDisplay, setKlineDisplay] = useState<{
+    open: string;
+    high: string;
+    low: string;
+    close: string;
+    change: string;
+    changePercent: string;
+  }>({
+    open: "--",
+    high: "--",
+    low: "--",
+    close: "--",
+    change: "--",
+    changePercent: "--",
+  });
+
   useEffect(() => {
     if (
       !mainChartContainerRef.current ||
@@ -467,14 +484,28 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
             macd: macdData[lastIndex].macd.toFixed(4),
           });
           setVolumeDisplay(formatVolume(data[lastIndex].volume));
+
+          // 显示最新K线数据
+          const lastKline = data[lastIndex];
+          const change = lastKline.close - lastKline.open;
+          const changePercent = (change / lastKline.open) * 100;
+          setKlineDisplay({
+            open: lastKline.open.toFixed(2),
+            high: lastKline.high.toFixed(2),
+            low: lastKline.low.toFixed(2),
+            close: lastKline.close.toFixed(2),
+            change: change.toFixed(2),
+            changePercent: changePercent.toFixed(2),
+          });
         }
         return;
       }
 
-      // 找到对应时间的MACD数据和成交量数据
+      // 找到对应时间的MACD数据、成交量数据和K线数据
       const timeStr = param.time as string;
       const macdPoint = macdData.find((d) => d.time === timeStr);
       const volumePoint = data.find((d) => d.date === timeStr);
+      const klinePoint = data.find((d) => d.date === timeStr);
 
       if (macdPoint) {
         setMacdDisplay({
@@ -486,6 +517,19 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
 
       if (volumePoint) {
         setVolumeDisplay(formatVolume(volumePoint.volume));
+      }
+
+      if (klinePoint) {
+        const change = klinePoint.close - klinePoint.open;
+        const changePercent = (change / klinePoint.open) * 100;
+        setKlineDisplay({
+          open: klinePoint.open.toFixed(2),
+          high: klinePoint.high.toFixed(2),
+          low: klinePoint.low.toFixed(2),
+          close: klinePoint.close.toFixed(2),
+          change: change.toFixed(2),
+          changePercent: changePercent.toFixed(2),
+        });
       }
     };
 
@@ -517,6 +561,7 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
         const timeStr = param.time as string;
         const macdPoint = macdData.find((d) => d.time === timeStr);
         const volumePoint = data.find((d) => d.date === timeStr);
+        const klinePoint = data.find((d) => d.date === timeStr);
 
         if (macdPoint) {
           setMacdDisplay({
@@ -528,6 +573,19 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
 
         if (volumePoint) {
           setVolumeDisplay(formatVolume(volumePoint.volume));
+        }
+
+        if (klinePoint) {
+          const change = klinePoint.close - klinePoint.open;
+          const changePercent = (change / klinePoint.open) * 100;
+          setKlineDisplay({
+            open: klinePoint.open.toFixed(2),
+            high: klinePoint.high.toFixed(2),
+            low: klinePoint.low.toFixed(2),
+            close: klinePoint.close.toFixed(2),
+            change: change.toFixed(2),
+            changePercent: changePercent.toFixed(2),
+          });
         }
       } else {
         mainChart.clearCrosshairPosition();
@@ -542,6 +600,18 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
             macd: macdData[lastIndex].macd.toFixed(4),
           });
           setVolumeDisplay(formatVolume(data[lastIndex].volume));
+
+          const lastKline = data[lastIndex];
+          const change = lastKline.close - lastKline.open;
+          const changePercent = (change / lastKline.open) * 100;
+          setKlineDisplay({
+            open: lastKline.open.toFixed(2),
+            high: lastKline.high.toFixed(2),
+            low: lastKline.low.toFixed(2),
+            close: lastKline.close.toFixed(2),
+            change: change.toFixed(2),
+            changePercent: changePercent.toFixed(2),
+          });
         }
       }
     };
@@ -572,6 +642,7 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
         const timeStr = param.time as string;
         const macdPoint = macdData.find((d) => d.time === timeStr);
         const volumePoint = data.find((d) => d.date === timeStr);
+        const klinePoint = data.find((d) => d.date === timeStr);
 
         if (macdPoint) {
           setMacdDisplay({
@@ -583,6 +654,19 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
 
         if (volumePoint) {
           setVolumeDisplay(formatVolume(volumePoint.volume));
+        }
+
+        if (klinePoint) {
+          const change = klinePoint.close - klinePoint.open;
+          const changePercent = (change / klinePoint.open) * 100;
+          setKlineDisplay({
+            open: klinePoint.open.toFixed(2),
+            high: klinePoint.high.toFixed(2),
+            low: klinePoint.low.toFixed(2),
+            close: klinePoint.close.toFixed(2),
+            change: change.toFixed(2),
+            changePercent: changePercent.toFixed(2),
+          });
         }
       } else {
         mainChart.clearCrosshairPosition();
@@ -597,6 +681,18 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
             macd: macdData[lastIndex].macd.toFixed(4),
           });
           setVolumeDisplay(formatVolume(data[lastIndex].volume));
+
+          const lastKline = data[lastIndex];
+          const change = lastKline.close - lastKline.open;
+          const changePercent = (change / lastKline.open) * 100;
+          setKlineDisplay({
+            open: lastKline.open.toFixed(2),
+            high: lastKline.high.toFixed(2),
+            low: lastKline.low.toFixed(2),
+            close: lastKline.close.toFixed(2),
+            change: change.toFixed(2),
+            changePercent: changePercent.toFixed(2),
+          });
         }
       }
     };
@@ -651,6 +747,21 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
       setVolumeDisplay(formatVolume(data[lastVolumeIndex].volume));
     }
 
+    // 初始化K线数据显示
+    if (lastIndex >= 0) {
+      const lastKline = data[lastIndex];
+      const change = lastKline.close - lastKline.open;
+      const changePercent = (change / lastKline.open) * 100;
+      setKlineDisplay({
+        open: lastKline.open.toFixed(2),
+        high: lastKline.high.toFixed(2),
+        low: lastKline.low.toFixed(2),
+        close: lastKline.close.toFixed(2),
+        change: change.toFixed(2),
+        changePercent: changePercent.toFixed(2),
+      });
+    }
+
     // 清理函数：取消十字线监听，防止内存泄漏
     return () => {
       mainChart.unsubscribeCrosshairMove(handleMainCrosshairMove);
@@ -661,10 +772,106 @@ const KLineChart = ({ data, title, onLoadMore }: KLineChartProps) => {
 
   return (
     <div style={{ width: "100%" }}>
-      {title && (
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>{title}</h2>
-      )}
-      <div ref={mainChartContainerRef} style={{ marginBottom: "10px" }} />
+      {/* 主图容器 */}
+      <div style={{ position: "relative", marginBottom: "10px" }}>
+        <div ref={mainChartContainerRef} />
+
+        {/* 股票名称 - 覆盖在图表顶部中间 */}
+        {title && (
+          <div
+            style={{
+              position: "absolute",
+              top: "8px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              padding: "6px 20px",
+              fontSize: "18px",
+              fontWeight: "700",
+              color: "#333",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              borderRadius: "4px",
+              pointerEvents: "none",
+              zIndex: 10,
+            }}
+          >
+            {title}
+          </div>
+        )}
+
+        {/* K线数据显示 - 覆盖在图表左上角，纵向排列 */}
+        <div
+          style={{
+            position: "absolute",
+            top: "8px",
+            left: "12px",
+            padding: "8px 12px",
+            fontSize: "14px",
+            fontFamily: "monospace",
+            pointerEvents: "none",
+            zIndex: 10,
+            lineHeight: "1.7",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            borderRadius: "4px",
+          }}
+        >
+          <div>
+            <span
+              style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+            >
+              开盘价:
+            </span>
+            <span style={{ fontWeight: "600", color: "#ff00f2ff" }}>
+              {klineDisplay.open}
+            </span>
+          </div>
+          <div>
+            <span
+              style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+            >
+              最高价:
+            </span>
+            <span style={{ fontWeight: "600", color: "#ef5350" }}>
+              {klineDisplay.high}
+            </span>
+          </div>
+          <div>
+            <span
+              style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+            >
+              最低价:
+            </span>
+            <span style={{ fontWeight: "600", color: "#26a69a" }}>
+              {klineDisplay.low}
+            </span>
+          </div>
+          <div>
+            <span
+              style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+            >
+              收盘价:
+            </span>
+            <span style={{ fontWeight: "600", color: "#0011ffff" }}>
+              {klineDisplay.close}
+            </span>
+          </div>
+          <div>
+            <span
+              style={{ fontWeight: "600", color: "#666", marginRight: "6px" }}
+            >
+              涨跌幅:
+            </span>
+            <span
+              style={{
+                fontWeight: "700",
+                color:
+                  parseFloat(klineDisplay.change) >= 0 ? "#ef5350" : "#26a69a",
+              }}
+            >
+              {klineDisplay.change} ({klineDisplay.changePercent}%)
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* 成交量副图容器 */}
       <div style={{ position: "relative", marginBottom: "10px" }}>
