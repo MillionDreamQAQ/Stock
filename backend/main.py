@@ -320,6 +320,13 @@ def get_stock_data(
                 detail=f"未能获取到股票 {db_code} 的数据"
             )
 
+        # 获取数据库中该股票的最早日期（如果之前没有查询过）
+        if not data_range:
+            data_range = db.get_data_range(db_code)
+
+        earliest_date_in_db = data_range['earliest'] if data_range else None
+        print(f"数据库最早日期: {earliest_date_in_db}")
+
         # 获取股票名称
         stock_info = db.search_stocks(db_code)
         stock_name = stock_info[0]['name'] if stock_info else db_code
@@ -330,7 +337,8 @@ def get_stock_data(
             "data": result,
             "total": len(result),
             "from_database": True,
-            "auto_synced": not bool(data_range)  # 标记是否是自动同步的
+            "auto_synced": not bool(data_range),  # 标记是否是自动同步的
+            "earliestDate": earliest_date_in_db  # 数据库中的最早日期
         }
 
     except HTTPException:

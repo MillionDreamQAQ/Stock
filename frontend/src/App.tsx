@@ -30,6 +30,7 @@ function StockPage() {
     code: "sh000001",
     name: "上证指数",
   });
+  const [earliestDate, setEarliestDate] = useState<string | null>(null);
   const isLoadingMoreRef = useRef(false);
 
   // 加载股票数据的通用函数
@@ -42,6 +43,7 @@ function StockPage() {
         const result = await stockApi.getStockData(code, { days });
         setAllData(result.data);
         setCurrentStock({ code: result.code, name: result.name });
+        setEarliestDate(result.earliestDate || null);
       } catch (err) {
         setError(err as Error);
       } finally {
@@ -79,8 +81,16 @@ function StockPage() {
           return prevData;
         }
 
-        const earliestDate = prevData[0].date;
-        const earliestDateObj = new Date(earliestDate);
+        const currentEarliestDate = prevData[0].date;
+
+        // 检查是否已经到达数据库中的最早日期
+        if (earliestDate && currentEarliestDate <= earliestDate) {
+          console.log("已到达数据边界，跳过加载");
+          isLoadingMoreRef.current = false;
+          return prevData;
+        }
+
+        const earliestDateObj = new Date(currentEarliestDate);
 
         // 往前推2000天
         const endDate = new Date(earliestDateObj);
@@ -124,7 +134,7 @@ function StockPage() {
       console.error("错误:", err);
       isLoadingMoreRef.current = false;
     }
-  }, [currentStock.code]);
+  }, [currentStock.code, earliestDate]);
 
   // 使用 useMemo 稳定 data 的引用，避免不必要的重渲染
   const memoizedData = useMemo(() => allData, [allData]);

@@ -12,6 +12,7 @@ export interface StockData {
   name: string;
   data: KLineData[];
   total: number;
+  earliestDate?: string; // 数据库中的最早日期（YYYY-MM-DD）
 }
 
 export interface StockInfo {
