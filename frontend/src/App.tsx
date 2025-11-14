@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, Layout, Spin, Alert } from "antd";
 import zhCN from "antd/locale/zh_CN";
@@ -126,6 +126,9 @@ function StockPage() {
     }
   }, [currentStock.code]);
 
+  // 使用 useMemo 稳定 data 的引用，避免不必要的重渲染
+  const memoizedData = useMemo(() => allData, [allData]);
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header
@@ -175,7 +178,7 @@ function StockPage() {
           {!isLoading && allData.length > 0 && (
             <>
               <KLineChart
-                data={allData}
+                data={memoizedData}
                 title={`${currentStock.name} (${currentStock.code})`}
                 onLoadMore={handleLoadMore}
               />

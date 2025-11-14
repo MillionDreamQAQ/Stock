@@ -2,7 +2,7 @@
  * 图表数据更新和交互的自定义 Hook
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KLineData } from "../../types/stock";
 import type {
   IChartApi,
@@ -75,7 +75,19 @@ export const useChartData = ({
     changePercent: "--",
   });
 
+  // 保存上一次的数据引用，避免重复执行
+  const previousDataRef = useRef(data);
+
   useEffect(() => {
+    // 如果数据引用没变，跳过执行（避免因为父组件重渲染导致的重复调用）
+    if (
+      previousDataRef.current === data &&
+      previousDataRef.current?.length === data?.length
+    ) {
+      return;
+    }
+    previousDataRef.current = data;
+
     if (
       !candlestickSeriesRef.current ||
       !volumeSeriesRef.current ||
