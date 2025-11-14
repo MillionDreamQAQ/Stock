@@ -115,7 +115,7 @@ function StockPage() {
           .finally(() => {
             setTimeout(() => {
               isLoadingMoreRef.current = false;
-            }, 100);
+            }, 1000);
           });
 
         return prevData;
